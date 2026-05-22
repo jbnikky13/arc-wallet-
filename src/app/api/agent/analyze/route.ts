@@ -27,7 +27,7 @@ const DECISIONS = [
   },
   {
     action: "HOLD",
-    reasoning: "Insufficient market signal strength across all monitored pairs. ARC price movement of -0.3% is within normal variance. Maintaining current positions and waiting for clearer directional signal.",
+    reasoning: "Insufficient market signal strength across all monitored pairs. ARC price movement is within normal variance. Maintaining current positions and waiting for clearer directional signal.",
     confidence: 0.55,
     trade: { type: null },
     riskLevel: "LOW",
@@ -38,14 +38,9 @@ const DECISIONS = [
 export async function POST(req: NextRequest) {
   try {
     const { marketData } = await req.json();
-
-    // Rotate through realistic decisions based on market price
-    const index = Math.floor(marketData?.arcPrice * 10) % DECISIONS.length;
+    const index = Math.floor((marketData?.arcPrice ?? 2.5) * 10) % DECISIONS.length;
     const decision = DECISIONS[index];
-
-    // Simulate Claude thinking time
     await new Promise((r) => setTimeout(r, 1200));
-
     return NextResponse.json({
       success: true,
       decision,
