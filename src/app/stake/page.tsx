@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import axios from "axios";
 
 const POOLS = [
   { name: "ARC Validator",  apy: 24.1, tvl: "$4.2M",  lock: "30 days",  icon: "◈", color: "#63caff" },
@@ -10,17 +11,38 @@ const POOLS = [
 export default function StakePage() {
   const [selected, setSelected] = useState(0);
   const [amount, setAmount] = useState("");
+  const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
   const pool = POOLS[selected];
   const yearlyReward = amount ? ((parseFloat(amount) * pool.apy) / 100).toFixed(2) : null;
+
+  const handleStake = async () => {
+    if (!amount) return;
+    setLoading(true);
+    try {
+      const res = await axios.post("/api/stake", {
+        poolName: pool.name,
+        amount,
+        walletId: "demo-wallet",
+      });
+      setResult(res.data);
+    } catch (err: any) {
+      alert(err.response?.data?.error ?? "Staking failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen p-6 max-w-2xl mx-auto">
       <h1 className="text-2xl font-black mb-1">◉ Staking</h1>
-      <p className="text-[#5b7a99] text-xs font-mono mb-8">Earn yield on Arc · No x402 fee · USDC rewards</p>
+      <p className="text-[#5b7a99] text-xs font-mono mb-8">
+        Earn yield on Arc · No x402 fee · USDC rewards
+      </p>
       <div className="space-y-3 mb-8">
         {POOLS.map((p, i) => (
-          <div key={p.name} onClick={() => setSelected(i)}
-            className={`border rounded-xl p-5 flex items-center gap-4 cursor-pointer transition-all ${selected === i ? "border-[#63caff] bg-[#0d1f35]" : "border-[#ffffff10] bg-[#0c1020] hover:border-[#ffffff20]"}`}>
+          <div key={p.name} onClick={() => { setSelected(i); setResult(null); }}
+            className={`border rounded-xl p-5 flex items-center gap-4 cursor-pointer transition-all ${selected === i ? "border-[#63caff] bg-[#0d1f35]" : "border-[#ffffff10] bg-[#0c1020]"}`}>
             <span className="text-2xl w-10 text-center">{p.icon}</span>
             <div className="flex-1">
               <p className="font-bold text-sm">{p.name}</p>
@@ -35,16 +57,30 @@ export default function StakePage() {
       </div>
       <div className="bg-[#0c1020] border border-[#ffffff10] rounded-xl p-6">
         <p className="font-bold mb-4">Stake in {pool.name}</p>
-        <input type="number" placeholder="Amount (USDC)" value={amount} onChange={(e) => setAmount(e.target.value)}
-          className="w-full bg-[#111827] border border-[#ffffff10] rounded-xl px-4 py-3 outline-none text-white font-mono mb-3 focus:border-[#63caff] text-sm" />
+        <input type="number" placeholder="Amount (USDC)" value={amount}
+          onChange={(e) => { setAmount(e.target.value); setResult(null); }}
+          className="w-full bg-[#111827] border border-[#ffffff10] rounded-xl px-4 py-3 outline-none text-white font-mono mb-3 text-sm" />
         {yearlyReward && (
           <p className="text-[#5b7a99] text-sm font-mono mb-4">
             Estimated yearly: <span className="text-[#00ffa3] font-bold">{yearlyReward} USDC</span>
           </p>
         )}
-        <button className="w-full bg-[#63caff] text-[#060810] font-bold py-3 rounded-xl hover:bg-[#00e5ff] transition-colors text-sm">
-          Stake {amount ? `${amount} USDC` : "Now"}
+        <button onClick={handleStake} disabled={loading || !amount}
+          className="w-full bg-[#63caff] text-[#060810] font-bold py-3 rounded-xl hover:bg-[#00e5ff] transition-colors text-sm disabled:opacity-50">
+          {loading ? "Staking..." : `Stake ${amount ? amount + " USDC" : "Now"}`}
         </button>
+        {result?.success && (
+          <div className="mt-4 bg-[#00ffa310] border border-[#00ffa330] rounded-xl p-4">
+            <p className="text-[#00ffa3] font-bold text-sm">✓ Staked successfully</p>
+            <p className="text-[#5b7a99] font-mono text-xs mt-1">
+              {amount} USDC → {pool.name} · APY: {result.apy}
+            </p>
+            <a href={result.explorer} target="_blank" rel="noopener"
+              className="text-[#63caff] font-mono text-xs underline mt-1 block">
+              View on ArcScan →
+            </a>
+          </div>
+        )}
       </div>
     </main>
   );
