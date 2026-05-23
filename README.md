@@ -23,27 +23,32 @@ A composable Web3 wallet built on Circle's Arc Network, exposing reusable primit
 - Arc Testnet (Chain ID: 5042002)
 
 ## Quick start
+
 ```bash
 git clone https://github.com/jbnikky13/arc-wallet
 cd arc-wallet
 npm install --legacy-peer-deps
 cp .env.example .env.local
-# Fill in your keys
 npm run dev
 ```
 
 ## Environment variables
 CIRCLE_API_KEY=TEST_API_KEY:key_id:key_secret
 CIRCLE_ENTITY_SECRET=your_64_char_hex
-ANTHROPIC_API_KEY=sk-ant-...
-NEXT_PUBLIC_WALLET_ADDRESS=0x...
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+NEXT_PUBLIC_WALLET_ADDRESS=0xYourWalletAddress
 NEXT_PUBLIC_ARC_RPC=https://rpc.testnet.arc.network
 NEXT_PUBLIC_ARC_CHAIN_ID=5042002
+NEXT_PUBLIC_ARC_EXPLORER=https://testnet.arcscan.app
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ## Arc Testnet
 - RPC: https://rpc.testnet.arc.network
 - Chain ID: 5042002
 - Explorer: https://testnet.arcscan.app
 - Faucet: https://faucet.circle.com
+
+## Live demo
+https://arc-wallet-dev.vercel.app
 
 ## License
 MIT
